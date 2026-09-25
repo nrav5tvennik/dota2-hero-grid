@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DotaArt — Hero Grid Creator</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- TOOLBAR -->
+    <header id="toolbar">
+      <div class="toolbar-group">
+        <span class="app-title">DotaArt</span>
+      </div>
+
+      <!-- Mode tabs -->
+      <div class="toolbar-group mode-tabs">
+        <button class="tab-btn active" data-tab="image">🖼 Изображение</button>
+        <button class="tab-btn" data-tab="draw">✏️ Рисование</button>
+        <button class="tab-btn" data-tab="text">🔤 Текст</button>
+      </div>
+
+      <!-- Export -->
+      <div class="toolbar-group">
+        <button id="btn-export" class="btn-primary">💾 Экспорт JSON</button>
+        <button id="btn-clear" class="btn-danger">🗑 Очистить</button>
+      </div>
+    </header>
+
+    <div id="workspace">
+      <!-- LEFT PANEL: settings -->
+      <aside id="panel-left">
+
+        <!-- IMAGE TAB -->
+        <div class="tab-content active" id="tab-image">
+          <h3>Изображение → Точки</h3>
+          <div class="form-group">
+            <label>Загрузить изображение</label>
+            <input type="file" id="img-upload" accept="image/*" />
+          </div>
+          <div class="preview-wrap">
+            <div class="preview-label">Оригинал</div>
+            <canvas id="preview-src" width="220" height="130"></canvas>
+          </div>
+          <div class="preview-wrap" id="preview-result-wrap" style="display:none">
+            <div class="preview-label" style="display:flex;align-items:center;justify-content:space-between">
+              <span>Результат (превью)</span>
+              <label class="toggle-label">
+                <input type="checkbox" id="preview-live" checked />
+                <span>Live</span>
+              </label>
+            </div>
+            <canvas id="preview-result" width="220" height="130" style="background:#0a0a0c;border-radius:4px"></canvas>
+          </div>
+          <div class="form-group">
+            <label>Режим конвертации</label>
+            <select id="img-mode">
+              <option value="edges">Контуры (Edges)</option>
+              <option value="dots">Точки (Dots)</option>
+              <option value="brightness">Яркость (Brightness)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Порог яркости: <span id="thresh-val">128</span></label>
+            <input type="range" id="img-threshold" min="0" max="255" value="128" />
+          </div>
+          <div class="form-group">
+            <label>Кол-во точек (макс): <span id="points-val">5000</span></label>
+            <input type="range" id="img-points" min="100" max="20000" step="100" value="5000" />
+          </div>
+          <div class="form-group">
+            <label>Радиус размытия: <span id="blur-val">0</span></label>
+            <input type="range" id="img-blur" min="0" max="5" step="0.5" value="0" />
+          </div>
+
+          <hr style="margin:8px 0"/>
+
+          <div class="form-group">
+            <label>Размер: ширина <span id="scale-w-val">100</span>%</label>
+            <input type="range" id="img-scale-w" min="10" max="100" value="100" />
+          </div>
+          <div class="form-group">
+            <label>Размер: высота <span id="scale-h-val">100</span>%</label>
+            <input type="range" id="img-scale-h" min="10" max="100" value="100" />
+          </div>
+          <div class="form-group">
+            <label>Смещение X: <span id="offset-x-val">0</span></label>
+            <input type="range" id="img-offset-x" min="-400" max="400" step="14" value="0" />
+          </div>
+          <div class="form-group">
+            <label>Смещение Y: <span id="offset-y-val">0</span></label>
+            <input type="range" id="img-offset-y" min="-300" max="300" step="14" value="0" />
+          </div>
+
+          <hr style="margin:8px 0"/>
+
+          <div class="form-group">
+            <label class="toggle-label">
+              <input type="checkbox" id="img-invert" />
+              <span>Инвертировать</span>
+            </label>
+          </div>
+          <div class="form-group">
+            <label class="toggle-label">
+              <input type="checkbox" id="img-multi-symbol" />
+              <span>Разные символы (по яркости)</span>
+            </label>
+          </div>
+          <div id="single-symbol-opts">
+            <div class="form-group">
+              <label>Символ точки</label>
+              <input type="text" id="img-symbol" value="." maxlength="4" style="width:60px" />
+            </div>
+          </div>
+          <div id="multi-symbol-opts" style="display:none">
+            <div class="form-group">
+              <label style="font-size:10px;color:#888">Палитра: тёмный → светлый</label>
+              <input type="text" id="img-symbol-palette" value="@#80X+:." style="font-family:monospace;letter-spacing:2px" />
+            </div>
+          </div>
+          <button id="btn-apply-image" class="btn-primary" style="width:100%;margin-top:6px">▶ Применить</button>
+
+        </div>
+
+        <!-- DRAW TAB -->
+        <div class="tab-content" id="tab-draw">
+          <h3>Инструменты рисования</h3>
+          <div class="form-group">
+            <label>Инструмент</label>
+            <div class="tool-grid">
+              <button class="tool-btn active" data-tool="pen" title="Карандаш">✏️</button>
+              <button class="tool-btn" data-tool="eraser" title="Ластик">🧹</button>
+              <button class="tool-btn" data-tool="line" title="Линия">╱</button>
+              <button class="tool-btn" data-tool="rect" title="Прямоугольник">▭</button>
+              <button class="tool-btn" data-tool="circle" title="Окружность">◯</button>
+              <button class="tool-btn" data-tool="fill" title="Заливка">🪣</button>
+              <button class="tool-btn" data-tool="select" title="Выделение" style="grid-column:span 2">⬚ Выделение</button>
+            </div>
+          </div>
+          <div id="selection-info" class="form-group" style="display:none">
+            <div style="font-size:11px;color:#aaa;background:#1a1a20;border-radius:4px;padding:6px 8px">
+              <span id="sel-count">0 ячеек</span> выделено<br/>
+              <span style="color:#666">Delete — удалить · Esc — снять</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Символ</label>
+            <input type="text" id="draw-symbol" value="." maxlength="4" style="width:60px" />
+          </div>
+          <div class="form-group">
+            <label>Размер кисти: <span id="brush-val">1</span></label>
+            <input type="range" id="draw-brush" min="1" max="5" value="1" />
+          </div>
+          <div class="form-group">
+            <label>Радиус (для окружности)</label>
+            <span id="draw-radius-info" style="font-size:11px;color:#aaa">Нарисуй перетаскиванием</span>
+          </div>
+
+          <hr style="margin:10px 0"/>
+          <h3 style="margin-bottom:8px">🔷 Пресеты фигур</h3>
+
+          <div class="form-group">
+            <label>Тип фигуры</label>
+            <select id="shape-type">
+              <option value="rect">Прямоугольник (рамка)</option>
+              <option value="rect-fill">Прямоугольник (заливка)</option>
+              <option value="rect-double">Прямоугольник (двойная рамка ╔╗╚╝)</option>
+              <option value="diamond">Ромб (контур)</option>
+              <option value="diamond-fill">Ромб (заливка)</option>
+              <option value="triangle-up">Треугольник ▲</option>
+              <option value="triangle-down">Треугольник ▼</option>
+              <option value="star">Звезда ✦</option>
+              <option value="cross">Крест +</option>
+            </select>
+          </div>
+
+          <!-- Rectangle-specific symbols -->
+          <div id="shape-rect-sym" class="form-group">
+            <label style="margin-bottom:4px">Символы рамки</label>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+              <div>
+                <div style="font-size:10px;color:#888;margin-bottom:2px">Угол</div>
+                <input type="text" id="shape-corner" value="+" maxlength="4" style="width:100%;box-sizing:border-box" />
+              </div>
+              <div>
+                <div style="font-size:10px;color:#888;margin-bottom:2px">Гориз. ─</div>
+                <input type="text" id="shape-horiz" value="-" maxlength="4" style="width:100%;box-sizing:border-box" />
+              </div>
+              <div>
+                <div style="font-size:10px;color:#888;margin-bottom:2px">Верт. │</div>
+                <input type="text" id="shape-vert" value="|" maxlength="4" style="width:100%;box-sizing:border-box" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Universal symbol for non-rect shapes -->
+          <div id="shape-sym-simple" class="form-group" style="display:none">
+            <label>Символ</label>
+            <input type="text" id="shape-symbol" value="*" maxlength="4" style="width:60px" />
+          </div>
+
+          <!-- Size controls -->
+          <div class="form-group" id="shape-size-wh">
+            <label>Ширина: <span id="shape-w-val">20</span> яч.</label>
+            <input type="range" id="shape-w" min="2" max="100" value="20" />
+            <label style="margin-top:6px">Высота: <span id="shape-h-val">10</span> яч.</label>
+            <input type="range" id="shape-h" min="2" max="60" value="10" />
+          </div>
+          <div class="form-group" id="shape-size-r" style="display:none">
+            <label>Радиус: <span id="shape-r-val">10</span> яч.</label>
+            <input type="range" id="shape-r" min="1" max="50" value="10" />
+          </div>
+
+          <!-- Position -->
+          <div class="form-group">
+            <label>Позиция X: <span id="shape-x-val">0</span></label>
+            <input type="range" id="shape-pos-x" min="0" max="160" value="0" />
+          </div>
+          <div class="form-group">
+            <label>Позиция Y: <span id="shape-y-val">0</span></label>
+            <input type="range" id="shape-pos-y" min="0" max="80" value="0" />
+          </div>
+
+          <button id="btn-place-shape" class="btn-primary" style="width:100%;margin-top:4px">▶ Разместить фигуру</button>
+        </div>
+
+        <!-- TEXT TAB -->
+        <div class="tab-content" id="tab-text">
+          <h3>Текст на холсте</h3>
+          <div class="form-group">
+            <label>Текст</label>
+            <textarea id="text-input" rows="3" placeholder="Введи текст..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Загрузить шрифт (изображение)</label>
+            <input type="file" id="font-upload" accept="image/*" />
+            <span style="font-size:11px;color:#aaa">Или используй встроенный растровый рендер</span>
+          </div>
+          <div class="form-group">
+            <label>Масштаб шрифта: <span id="font-scale-val">1</span></label>
+            <input type="range" id="font-scale" min="1" max="5" value="1" />
+          </div>
+          <div class="form-group">
+            <label>Межсимвольный интервал: <span id="font-spacing-val">14</span></label>
+            <input type="range" id="font-spacing" min="7" max="42" step="7" value="14" />
+          </div>
+          <div class="form-group">
+            <label>Порог символа</label>
+            <input type="text" id="text-symbol" value="." maxlength="4" style="width:60px" />
+          </div>
+          <div class="form-group">
+            <label>Позиция X: <span id="text-x-val">50</span></label>
+            <input type="range" id="text-pos-x" min="0" max="780" step="14" value="50" />
+          </div>
+          <div class="form-group">
+            <label>Позиция Y: <span id="text-y-val">50</span></label>
+            <input type="range" id="text-pos-y" min="0" max="570" step="14" value="50" />
+          </div>
+          <button id="btn-apply-text" class="btn-primary" style="width:100%">▶ Добавить текст</button>
+        </div>
+
+      </aside>
+
+      <!-- MAIN CANVAS AREA -->
+      <main id="canvas-area">
+        <div id="canvas-toolbar">
+          <span id="status-bar">Холст 57×41 (≈2337 ячеек)</span>
+          <div style="display:flex;gap:8px;align-items:center">
+            <label style="font-size:12px">Масштаб:</label>
+            <select id="zoom-select">
+              <option value="0.5">50%</option>
+              <option value="0.75">75%</option>
+              <option value="1" selected>100%</option>
+              <option value="1.5">150%</option>
+              <option value="2">200%</option>
+            </select>
+            <label style="font-size:12px">Сетка:</label>
+            <input type="checkbox" id="show-grid" checked />
+          </div>
+        </div>
+        <div id="canvas-scroll">
+          <canvas id="main-canvas"></canvas>
+        </div>
+        <div id="coords-bar">x: 0, y: 0 | ячейка: (0, 0)</div>
+      </main>
+
+      <!-- RIGHT PANEL: layers / preview -->
+      <aside id="panel-right">
+        <h3>Слои</h3>
+        <div id="layers-list">
+          <div class="layer-item active" data-layer="0">
+            <span class="layer-vis">👁</span>
+            <span class="layer-name">Слой 1</span>
+            <button class="layer-del">✕</button>
+          </div>
+        </div>
+        <button id="btn-add-layer" style="width:100%;margin-top:6px">+ Слой</button>
+
+        <hr />
+        <h3>Настройки экспорта</h3>
+        <div class="form-group">
+          <label>Имя конфига</label>
+          <input type="text" id="export-name" value="Custom" />
+        </div>
+        <div class="form-group">
+          <label>Шаг сетки X: <span id="grid-step-x-val">14</span></label>
+          <input type="range" id="grid-step-x" min="3" max="28" step="1" value="14" />
+        </div>
+        <div class="form-group">
+          <label>Шаг сетки Y: <span id="grid-step-y-val">14</span></label>
+          <input type="range" id="grid-step-y" min="3" max="28" step="1" value="14" />
+        </div>
+        <div class="form-group">
+          <label>Начало X: <span id="grid-origin-x-val">8</span></label>
+          <input type="range" id="grid-origin-x" min="0" max="50" step="1" value="8" />
+        </div>
+        <div class="form-group">
+          <label>Начало Y: <span id="grid-origin-y-val">3</span></label>
+          <input type="range" id="grid-origin-y" min="0" max="50" step="1" value="3" />
+        </div>
+        <div class="form-group">
+          <label style="display:flex;justify-content:space-between">
+            <span>Ширина холста (px)</span>
+            <span id="canvas-w-val" style="color:var(--accent);font-weight:600">1160</span>
+          </label>
+          <input type="range" id="canvas-dota-w" min="400" max="1600" step="14" value="1160" />
+        </div>
+        <div class="form-group">
+          <label style="display:flex;justify-content:space-between">
+            <span>Высота холста (px)</span>
+            <span id="canvas-h-val" style="color:var(--accent);font-weight:600">570</span>
+          </label>
+          <input type="range" id="canvas-dota-h" min="200" max="800" step="14" value="570" />
+        </div>
+        <div style="font-size:10px;color:#555;margin-bottom:8px">
+          📐 Реф: X 8–1145 · Y 3–559
+        </div>
+        <div class="form-group">
+          <label>Символ по умолчанию</label>
+          <input type="text" id="default-symbol" value="." maxlength="4" style="width:60px" />
+        </div>
+
+
+        <hr />
+        <h3>Мини-превью</h3>
+        <canvas id="mini-preview" width="220" height="140" style="border:1px solid #333;background:#111;width:100%"></canvas>
+      </aside>
+    </div>
+  </div>
+
+  <script src="js/grid.js"></script>
+  <script src="js/canvas.js"></script>
+  <script src="js/tools.js"></script>
+  <script src="js/imageProcessor.js"></script>
+  <script src="js/textRenderer.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/undo.js"></script>
+  <script src="js/shapes.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
