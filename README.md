@@ -25,18 +25,16 @@
 DotaArt/
 ├── index.html
 ├── css/style.css
-├── js/
-│   ├── app.js          # Главный контроллер
-│   ├── grid.js         # Модель сетки (слои, координаты)
-│   ├── canvas.js       # Рендер холста
-│   ├── tools.js        # Инструменты рисования + выделение
-│   ├── imageProcessor.js  # Canny edge detector (hi-res)
-│   ├── textRenderer.js # Пиксельный шрифт
-│   ├── shapes.js       # Пресеты фигур
-│   ├── export.js       # Экспорт в Dota 2 JSON
-│   └── undo.js         # История отмены
-└── Ref/
-    └── hero_grid_config.json  # Референсный JSON
+└── js/
+    ├── app.js          # Главный контроллер
+    ├── grid.js         # Модель сетки (слои, координаты)
+    ├── canvas.js       # Рендер холста
+    ├── tools.js        # Инструменты рисования + выделение
+    ├── imageProcessor.js  # Canny edge detector (hi-res)
+    ├── textRenderer.js # Пиксельный шрифт
+    ├── shapes.js       # Пресеты фигур
+    ├── export.js       # Экспорт в Dota 2 JSON
+    └── undo.js         # История отмены
 ```
 
 Поддержать USDT:

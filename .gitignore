@@ -12,3 +12,6 @@ desktop.ini
 
 # Node (if ever added)
 node_modules/
+
+# Reference files (local only)
+Ref/
