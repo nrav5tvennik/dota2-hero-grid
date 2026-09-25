@@ -40,6 +40,7 @@ DotaArt/
 ```
 
 Поддержать USDT:
+
 UQAROrivxBAvKg_LuV8YjM_--UA5JGyb1A8Tk9GVwkT7Ivsj - TON
 
 TBT2kt6RjaiQ2VyUHd5vB5N73WfC2ugYrf - Tron
